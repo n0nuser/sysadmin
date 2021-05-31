@@ -1,0 +1,12 @@
+#!/bin/sh
+
+dir="/var/www/names/"
+
+while true; do
+    sleep 1
+    for file in $(ls $dir); do
+        chown -R $file:usuarios /home/$file
+        echo "Se va a borrar $dir$file" >> /home/admin/usuariosnuevos.txt
+        rm "$dir$file"
+    done
+done

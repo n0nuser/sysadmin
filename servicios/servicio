@@ -1,0 +1,11 @@
+[Unit]
+Description=Chown directories for new users
+After=network.target network-online.target
+Requires=network-online.target
+
+[Service]
+RemainAfterExit=true
+ExecStart=/usr/bin/dirlookup
+
+[Install]
+WantedBy=multi-user.target
