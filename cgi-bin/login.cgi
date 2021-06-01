@@ -7,6 +7,7 @@
 #     access username/password file.
 
 use CGI;
+use CGI::Cookie;
 use Authen::PAM;
 use POSIX;
 use IPC::System::Simple qw(system capture);
@@ -47,13 +48,20 @@ my $res = $pamh->pam_authenticate;
 
 # Return success or failure
 if ($res == PAM_SUCCESS()) {
-    my $results = do {
-        local $ENV{QUERY_STRING} = 'BARE=1';
-        qx{./monitor.cgi};
-    };
-    print $results;
-    #print $q->redirect("https://google.com");
+    $cookie1 = CGI::Cookie->new(-name=>'Username',-value=>$username);
+    if ($username eq "admin")
+    {
+        my $results = do
+        {
+            local $ENV{QUERY_STRING} = 'BARE=1';
+            qx{./monitor.cgi};
+        };
+        print $results;
+    }
+    
+    print "Hola $username";
+    
+
 } else {
-    #print $q->redirect("https://apple.com");
     print "User or password wrong\n";
 }

@@ -30,7 +30,7 @@ Linux::usermod->add($username, $password, '', $group, '', $directory, $shell);
 mkdir "$directory",0755 or print "Directory cannot be created: $!<br>";
 File::Copy::Recursive::dircopy("/etc/skel",$directory) or print "Cannot copy Skel files to $name\'s home: $!<br>";
 
-$chownFile="/var/www/names/$username";
+$chownFile="/var/www/nameNew/$username";
 open(FH, '>', $chownFile) or print "Failed to create empty: $!\n";
 close(FH);
 

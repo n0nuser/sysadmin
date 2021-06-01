@@ -28,6 +28,10 @@ smtpd_use_tls=yes
 smtpd_tls_cert_file = /etc/letsencrypt/live/nonuser.onthewifi.com/fullchain.pem
 smtpd_tls_key_file = /etc/letsencrypt/live/nonuser.onthewifi.com/privkey.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+smtpd_tls_security_level = may
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
 smtp_use_tls = yes
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 smtp_tls_security_level = may
@@ -37,21 +41,15 @@ smtp_tls_security_level = may
 
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 myhostname = nonuser.onthewifi.com
+mydomain = nonuser.onthewifi.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-mydestination = $myhostname, nonuser.onthewifi.com, localhost, localhost.localdomain, localhost
+mydestination = $myhostname, nonuser.onthewifi.com, localhost, localhost.localdomain
 relayhost =
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
 inet_protocols = all
-
-# Added
-mydomain = nonuser.onthewifi.com
-smtpd_tls_security_level = may
-smtpd_sasl_auth_enable = yes
-smtpd_sasl_type = dovecot
-smtpd_sasl_path = private/auth
 home_mailbox = Maildir/

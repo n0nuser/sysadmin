@@ -2,6 +2,10 @@ function f_noNet {
     # Change root password
     passwd
 
+    # Skel
+    mkdir /etc/skel/Maildir
+    mkdir /etc/skel/public_html
+
     # Add admin user
     adduser admin
 
@@ -66,7 +70,7 @@ function f_webfiles {
     # Servicio chown
     mkdir /var/www/names/
     chown www-data:www-data /var/www/names/
-    cp servicios/dirlookup /usr/bin/dirlookup
+    cp servicios/dirlookup.sh /usr/bin/dirlookup
     chmod +x /usr/bin/dirlookup
     cp servicios/servicio /lib/systemd/system/dirlookupd.service
     systemctl enable dirlookupd.service
@@ -214,7 +218,11 @@ enabled = true" > /etc/fail2ban/jail.d/defaults-debian.confç
  }
 
  function quota {
-    apt install quota
+    apt install quota -y
+    # Edit /etc/fstab
+    mount -o remount /
+    quotacheck -gum /
+    quotaon /
  }
 
 function main {
