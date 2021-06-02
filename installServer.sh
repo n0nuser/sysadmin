@@ -47,7 +47,7 @@ ff02::2         ip6-allrouters" > /etc/hosts
 
 function f_net {
     apt update -y && apt upgrade -y
-    apt install net-tools locales sudo build-essential cpanminus libpam0g libpam0g-dev -y
+    apt install net-tools locales sudo build-essential cpanminus ufw libpam0g libpam0g-dev -y
     sed -i '/es_ES.UTF-8/s/^#//g' /etc/locale.gen
     locale-gen es_ES.UTF-8
     usermod -aG sudo admin
@@ -68,8 +68,10 @@ function f_webfiles {
     cp -r cgi-bin/* /lib/cgi-bin/
         
     # Servicio chown
-    mkdir /var/www/names/
-    chown www-data:www-data /var/www/names/
+    mkdir /var/www/nameNew/
+    mkdir /var/www/nameDel/
+    chown www-data:www-data /var/www/nameNew/
+    chown www-data:www-data /var/www/nameDel/
     cp servicios/dirlookup.sh /usr/bin/dirlookup
     chmod +x /usr/bin/dirlookup
     cp servicios/servicio /lib/systemd/system/dirlookupd.service
@@ -212,18 +214,34 @@ enabled = true
 enabled = true
 
 [roundcube-auth]
-enabled = true" > /etc/fail2ban/jail.d/defaults-debian.confç
+enabled = true" > /etc/fail2ban/jail.d/defaults-debian.conf
 
     systemctl restart fail2ban
- }
+}
 
- function quota {
+function quota {
     apt install quota -y
     # Edit /etc/fstab
     mount -o remount /
     quotacheck -gum /
     quotaon /
- }
+}
+
+function f_rsyslog {
+    # Logs de Apache
+    echo 'module(load="imfile" PollingInterval="10")
+input(type="imfile"
+      File="/var/log/apache2/access.log"
+      Tag="[APACHE]"
+      Severity="error"
+      Facility="local6")
+local6.error        /home/admin/access.log' > /etc/rsyslog.d/02-apache.conf
+    # Logs de correos
+    echo "mail.*    -/home/admin/access.log" >> /etc/rsyslog.conf
+    # Logs de autenticación por PAM (SSH, SFTP y Apache)
+    echo "auth,authpriv.*                 -/home/admin/access.log" >> /etc/rsyslog.conf
+    systemctl restart rsyslog
+}
 
 function main {
     read -p "Do you have internet? (Y/N): " yesNo
@@ -236,6 +254,7 @@ function main {
         f_roundcube
         f_fail2ban
         f_quota
+        f_rsyslog
     else
         f_noNet
     fi

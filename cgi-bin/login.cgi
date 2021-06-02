@@ -10,14 +10,13 @@ use CGI;
 use CGI::Cookie;
 use Authen::PAM;
 use POSIX;
+use utf8;
 use IPC::System::Simple qw(system capture);
 
 $q = CGI->new;
 $username = $q->param('email');
 $password = $q->param('password');
 $service = "passwd";
-
-print $q->header;
 
 # This "conversation function" will pass
 # $password to PAM when it asks for it.
@@ -48,20 +47,15 @@ my $res = $pamh->pam_authenticate;
 
 # Return success or failure
 if ($res == PAM_SUCCESS()) {
-    $cookie1 = CGI::Cookie->new(-name=>'Username',-value=>$username);
+    my $cookie = $q->cookie( -name => "campurriana", -value => $username, -path => "/" );
+    
     if ($username eq "admin")
     {
-        my $results = do
-        {
-            local $ENV{QUERY_STRING} = 'BARE=1';
-            qx{./monitor.cgi};
-        };
-        print $results;
+        print $q->redirect ( -url => "https://nonuser.onthewifi.com/cgi-bin/admin.cgi", -cookie => $cookie );
     }
-    
-    print "Hola $username";
-    
-
+    else{
+        print $q->redirect ( -url => "https://nonuser.onthewifi.com/cgi-bin/dashboard.cgi", -cookie => $cookie );
+    }
 } else {
-    print "User or password wrong\n";
+    print $q->redirect("https://nonuser.onthewifi.com/login.html");
 }

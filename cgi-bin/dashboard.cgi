@@ -1,15 +1,31 @@
-<!doctype html>
+#!/usr/bin/perl -wT
+
+use warnings;
+use Linux::usermod;
+use CGI;
+use CGI::Cookie;
+use utf8;
+use File::Copy::Recursive;
+use Encode;
+
+$q = CGI->new;
+print $q->header;
+
+%cookies = CGI::Cookie->fetch;
+$username = $cookies{'campurriana'}->value;
+
+print qq(<!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A layout example that shows off a responsive product landing page.">
-    <title>Hi! | The Pirate Bay 🏴‍☠️</title>
-    <link rel="stylesheet" href="css/pure-min.css">
-    <link rel="stylesheet" href="css/grids-responsive-min.css">
+    <title>Hi! | The Pirate Bay &#127988;&#8205;&#9760;&#65039;</title>
+    <link rel="stylesheet" href="../css/pure-min.css">
+    <link rel="stylesheet" href="../css/grids-responsive-min.css">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <style>
         .center-screen {
             display: flex;
@@ -44,18 +60,18 @@
 <body>
     <div class="header">
         <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
-            <a class="pure-menu-heading" href="index.html">The Pirate Bay</a>
+            <a class="pure-menu-heading" href="https://nonuser.onthewifi.com/">The Pirate Bay</a>
 
             <ul class="pure-menu-list">
-                <li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">Inicio</a></li>
+                <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
                 <li class="pure-menu-item"><a href="#" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="account.html" class="pure-menu-link">Mi cuenta</a></li>
+                <li class="pure-menu-item"><a href="/cgi-bin/account.cgi" class="pure-menu-link">Mi cuenta</a></li>
             </ul>
         </div>
     </div>
     <div class="center-screen">
         <div class="content">
-            <h2 class="content-head is-center">Ofrecemos múltiples servicios gratuitos.</h2>
+            <h2 class="content-head is-center">Bienvenido $username</h2>
 
             <div class="pure-g">
                 <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
@@ -73,14 +89,15 @@
                         Almacenamiento para Webs
                     </h3>
                     <p>Crea un espacio para tu web (Almacenamiento 5MB)</p>
-                    <p><a href="" class="pure-button pure-button-primary">Crear</a></p>
+                    <p>Conéctate mediante SFTP con el siguiente comando:</p>
+                    <pre>sftp -P 2222 $username\@nonuser.onthewifi.com</pre>
                 </div>
                 <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
                     <h3 class="content-subhead">
                         <i class="fa fa-th-large"></i>
                         Creación de Blogs con Hugo
                     </h3>
-                    <p>Crea tus blogs con Hugo rápidamente</p>
+                    <p>Crea tus blogs personalizados y de forma rápida con GoHugo</p>
                     <p><a href="" class="pure-button pure-button-primary">Crear</a></p>
                 </div>
                 <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
@@ -88,7 +105,7 @@
                         <i class="fas fa-phone-alt"></i>
                         Servicio de VOIP
                     </h3>
-                    <p>Hable con sus amigos y familiares fácilmente con nuestro servicio de voz Teamspeak.</p>
+                    <p>Hable con sus amigos fácilmente con nuestro servicio de voz.</p>
                     <p><a href="" class="pure-button pure-button-primary">Continuar</a></p>
                 </div>
             </div>
@@ -97,4 +114,4 @@
     <div class="footer l-box is-center">Copyright © 2021, The Pirate Bay<br>All rights reserved.</div>
 </body>
 
-</html>
+</html>);

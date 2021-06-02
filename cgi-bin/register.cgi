@@ -3,6 +3,7 @@
 use warnings;
 use Linux::usermod;
 use CGI;
+use CGI::Cookie;
 use utf8;
 use File::Copy::Recursive;
 
@@ -16,8 +17,6 @@ $surname = $q->param('surname');
 $directory = "/home/$username";
 $group = "1001";
 $shell = "/usr/sbin/nologin";
-
-print $q->header;
 
 if($username eq "root"){
    print("That user is already taken<br>");
@@ -34,4 +33,5 @@ $chownFile="/var/www/nameNew/$username";
 open(FH, '>', $chownFile) or print "Failed to create empty: $!\n";
 close(FH);
 
-print "<h1>Datos:</h1><br>Name: $name<br>Password: $pass<br>UID: $uid<br>GID: $gid<br>Quota: $quota<br>Shell: $shell<br>Home: $dir<br>";
+my $cookie = $q->cookie( -name => "campurriana", -value => $username, -path => "/" );
+print $q->redirect ( -url => "https://nonuser.onthewifi.com/cgi-bin/dashboard.cgi", -cookie => $cookie );

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -w
 
 use warnings;
 use Linux::usermod;
@@ -6,13 +6,19 @@ use CGI;
 use CGI::Cookie;
 use utf8;
 use File::Copy::Recursive;
-use Encode;
 
 $q = CGI->new;
+
 print $q->header;
 
 %cookies = CGI::Cookie->fetch;
 $username = $cookies{'campurriana'}->value;
+
+Linux::usermod->del($username);
+
+$delUser="/var/www/nameDel/$username";
+open(FH, '>', $delUser) or print "Failed to create empty: $!\n";
+close(FH);
 
 print qq(<!doctype html><html lang="en">
 
@@ -53,14 +59,6 @@ print qq(<!doctype html><html lang="en">
             background-color: #1f8dd6;
             color: #fff;
         }
-
-        .pure-button-primary1,
-        .pure-button-selected,
-        a.pure-button-primary,
-        a.pure-button-selected {
-            background-color: #D22B2B;
-            color: #fff;
-        }
     </style>
 </head>
 
@@ -72,23 +70,17 @@ print qq(<!doctype html><html lang="en">
             <ul class="pure-menu-list">
                 <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
                 <li class="pure-menu-item"><a href="#" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="#" class="pure-menu-link">Mi cuenta</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/login.html" class="pure-menu-link">Iniciar sesión</a></li>
             </ul>
         </div>
     </div>
     <div class="content center-screen">
-        <h2 class="content-head is-center">¡Hola $username!</h2>
+        <h2 class="content-head is-center">¡Cuenta borrada!</h2>
+        <h3 class="content-head is-center">Para volver al inicio pulse el botón inferior.</h3>
 
         <div class="pure-g">
             <div class="l-box-lrg pure-u-1 pure-u-md-2-5">
-                <label for="name">Modificar mis datos</label>
-                <button type="submit" class="pure-button pure-button-primary">Modificar</button>
-                <br>
-                <label for="email">Cambiar contraseña</label>
-                <button onclick="location.href ='/cgi-bin/password.cgi';" method="Post" class="pure-button pure-button-primary">Cambiar contraseña</button>
-                <br>
-                <label for="email">Eliminar cuenta</label>
-                <button onclick="location.href ='/cgi-bin/delete.cgi';" method="Post" class="pure-button pure-button-primary1">Eliminar</button>
+                <button onclick="location.href ='https://nonuser.onthewifi.com/';" method="Post" class="pure-button pure-button-primary">INICIO</button>
             </div>
         </div>
     </div>

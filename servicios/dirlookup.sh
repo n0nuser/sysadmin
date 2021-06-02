@@ -19,7 +19,6 @@ while true; do
     for file in $(ls $dirDel); do
         echo "[DEL][$(date "+%H:%M:%S %d-%m-%Y")] $dirDel$file" >> /home/admin/usuarios.log
         rm "$dirDel$file"
-        deluser $file
         rm -r /home/$file
     done
 done

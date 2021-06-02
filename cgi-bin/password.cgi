@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -w
 
 use warnings;
 use Linux::usermod;
@@ -6,9 +6,9 @@ use CGI;
 use CGI::Cookie;
 use utf8;
 use File::Copy::Recursive;
-use Encode;
 
 $q = CGI->new;
+
 print $q->header;
 
 %cookies = CGI::Cookie->fetch;
@@ -53,15 +53,29 @@ print qq(<!doctype html><html lang="en">
             background-color: #1f8dd6;
             color: #fff;
         }
-
-        .pure-button-primary1,
-        .pure-button-selected,
-        a.pure-button-primary,
-        a.pure-button-selected {
-            background-color: #D22B2B;
-            color: #fff;
-        }
     </style>
+    <script>  
+        function checkPassword(form) {
+            password1 = form.password1.value;
+            password2 = form.password2.value;
+
+            if (password1 == '')
+                alert ("Introduzca la contraseña");
+                    
+            else if (password2 == '')
+                alert ("Introduzca la confirmación de contraseña");
+                    
+            else if (password1 != password2) {
+                alert ("\nLas contraseñas no coinciden: Inténtelo de nuevo...")
+                return false;
+            }
+
+            else{
+                alert ("\nContraseña modificada correctamente.")
+                return true;
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -72,25 +86,18 @@ print qq(<!doctype html><html lang="en">
             <ul class="pure-menu-list">
                 <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
                 <li class="pure-menu-item"><a href="#" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="#" class="pure-menu-link">Mi cuenta</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/login.html" class="pure-menu-link">Iniciar sesión</a></li>
             </ul>
         </div>
     </div>
     <div class="content center-screen">
-        <h2 class="content-head is-center">¡Hola $username!</h2>
-
-        <div class="pure-g">
-            <div class="l-box-lrg pure-u-1 pure-u-md-2-5">
-                <label for="name">Modificar mis datos</label>
-                <button type="submit" class="pure-button pure-button-primary">Modificar</button>
-                <br>
-                <label for="email">Cambiar contraseña</label>
-                <button onclick="location.href ='/cgi-bin/password.cgi';" method="Post" class="pure-button pure-button-primary">Cambiar contraseña</button>
-                <br>
-                <label for="email">Eliminar cuenta</label>
-                <button onclick="location.href ='/cgi-bin/delete.cgi';" method="Post" class="pure-button pure-button-primary1">Eliminar</button>
-            </div>
-        </div>
+        <form class="pure-form" onSubmit="return checkPassword(this)" action="/cgi-bin/passwd.cgi" method="Post">
+            <fieldset style="background: white; padding: 2em; border: 20px; border-radius: 15px; border-color: black;">
+                <input name="password1" type="password" placeholder="Contraseña nueva" /><br>
+                <input name="password2" type="password" placeholder="Confirmar contraseña" /><br>
+                <button type="submit" class="pure-button pure-button-primary">Modificar contraseña</button>
+            </fieldset>
+        </form>
     </div>
     <div class="footer l-box is-center">Copyright © 2021, The Pirate Bay<br>All rights reserved.</div>
 </body>
