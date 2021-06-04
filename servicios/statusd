@@ -1,0 +1,11 @@
+[Unit]
+Description=Checks for active services every half an hour
+After=network.target network-online.target
+Requires=network-online.target
+
+[Service]
+RemainAfterExit=true
+ExecStart=/usr/bin/status
+
+[Install]
+WantedBy=multi-user.target

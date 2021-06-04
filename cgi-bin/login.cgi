@@ -1,61 +1,81 @@
 #!/usr/bin/perl -w
 
-# CAVEATS
-#   * Requires Authen::PAM module, which may also
-#     require the pam-devel package.
-#   * May need to be run as root in order to
-#     access username/password file.
-
+use warnings;
 use CGI;
 use CGI::Cookie;
-use Authen::PAM;
-use POSIX;
+use CGI::Session;
 use utf8;
-use IPC::System::Simple qw(system capture);
 
 $q = CGI->new;
-$username = $q->param('email');
-$password = $q->param('password');
-$service = "passwd";
 
-# This "conversation function" will pass
-# $password to PAM when it asks for it.
-sub my_conv_func {
-        my @res;
-        while ( @_ ) {
-                my $code = shift;
-                my $msg = shift;
-                my $ans = "";
+#Crear un objeto session
+my $session = new CGI::Session;
 
-                $ans = $username if ($code == PAM_PROMPT_ECHO_ON() );
-                $ans = $password if ($code == PAM_PROMPT_ECHO_OFF() );
+#Cargamos datos de la session
+$session->load();
 
-                push @res, (PAM_SUCCESS(),$ans);
-        }
-        push @res, PAM_SUCCESS();
-        return @res;
-}
+#Creamos una array para guardar los datos de sesión
+my @autenticar = $session->param;
 
-# Initialize PAM object
-if (!ref($pamh = new Authen::PAM($service, $username, \&my_conv_func))) {
-    print "Authen::PAM init failed\n";
-    exit 1;
-}
+if (@autenticar eq 0 || $session->is_expired) {
+  print $q->header;
+  $session->delete();
+  $session->flush();
+  print qq(<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 
-# Authenticate with PAM
-my $res = $pamh->pam_authenticate;
-
-# Return success or failure
-if ($res == PAM_SUCCESS()) {
-    my $cookie = $q->cookie( -name => "campurriana", -value => $username, -path => "/" );
-    
-    if ($username eq "admin")
-    {
-        print $q->redirect ( -url => "https://nonuser.onthewifi.com/cgi-bin/admin.cgi", -cookie => $cookie );
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <link rel="stylesheet" href="../css/pure-min.css">
+  <link rel="stylesheet" href="../css/grids-responsive-min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <title>Login | The Pirate Bay &#127988;&#8205;&#9760;&#65039;</title>
+  <style>
+    .center-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 100vh;
     }
-    else{
-        print $q->redirect ( -url => "https://nonuser.onthewifi.com/cgi-bin/dashboard.cgi", -cookie => $cookie );
+
+    body {
+      background: url("../img/login.jpg") no-repeat center center fixed;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
     }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+      <a class="pure-menu-heading" href="https://nonuser.onthewifi.com/">The Pirate Bay</a>
+
+      <ul class="pure-menu-list">
+        <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/var/www/html/ayuda.html" class="pure-menu-link">Ayuda</a></li>
+        <li class="pure-menu-item"><a href="#" class="pure-menu-link">Mi cuenta</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="center-screen">
+    <form class="pure-form" action="/cgi-bin/logged.cgi" method="Post">
+      <fieldset style="background: white; padding: 2em; border: 20px; border-radius: 15px; border-color: black;">
+        <input name="email" type="text" placeholder="Email" /><br>
+        <input name="password" type="password" placeholder="Password" /><br>
+        <button type="submit" class="pure-button pure-button-primary">Iniciar Sesión</button>
+        <p>¿No tienes cuenta? <a href="register.cgi">Regístrate</a></p>
+        <p>¿Has olvidado tu contraseña? <a href="forgot.cgi">Contraseña olvidada</a></p>
+      </fieldset>
+    </form>
+  </div>
+</body>
+
+</html>);
 } else {
-    print $q->redirect("https://nonuser.onthewifi.com/login.html");
+  print $q->redirect("https://nonuser.onthewifi.com/cgi-bin/dashboard.cgi");
 }

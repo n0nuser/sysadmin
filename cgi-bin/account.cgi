@@ -1,19 +1,29 @@
 #!/usr/bin/perl -wT
 
 use warnings;
-use Linux::usermod;
 use CGI;
+use CGI::Session;
 use CGI::Cookie;
 use utf8;
-use File::Copy::Recursive;
-use Encode;
 
 $q = CGI->new;
+
+# Gestión sesión
+my $session = new CGI::Session;
+$session->load();
+my @autenticar = $session->param;
+
+if (@autenticar eq 0) {
+    $session->delete();
+    $session->flush();
+    print $q->redirect("https://nonuser.onthewifi.com/");
+} elsif ($session->is_expired) {
+    $session->delete();
+    $session->flush();
+    print $q->redirect("https://nonuser.onthewifi.com/");
+} else {
 print $q->header;
-
-%cookies = CGI::Cookie->fetch;
-$username = $cookies{'campurriana'}->value;
-
+my $username = $session->param("username");
 print qq(<!doctype html><html lang="en">
 
 <head>
@@ -61,6 +71,14 @@ print qq(<!doctype html><html lang="en">
             background-color: #D22B2B;
             color: #fff;
         }
+        .wrapper {
+            display: grid;
+            grid-gap: 30px;
+            grid-template-columns: auto;
+        }
+        .wrapper_item {
+            position: relative;
+        }
     </style>
 </head>
 
@@ -70,29 +88,32 @@ print qq(<!doctype html><html lang="en">
             <a class="pure-menu-heading" href="https://nonuser.onthewifi.com/">The Pirate Bay</a>
 
             <ul class="pure-menu-list">
-                <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
-                <li class="pure-menu-item"><a href="#" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="#" class="pure-menu-link">Mi cuenta</a></li>
+                <li class="pure-menu-item"><a href="dashboard.cgi" class="pure-menu-link">Dashboard</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
+                <li class="pure-menu-item"><a href="delSession.cgi" class="pure-menu-link">Cerrar Sesión</a></li>
             </ul>
         </div>
     </div>
     <div class="content center-screen">
-        <h2 class="content-head is-center">¡Hola $username!</h2>
-
-        <div class="pure-g">
-            <div class="l-box-lrg pure-u-1 pure-u-md-2-5">
+            <div class="l-box-lrg pure-u-1 pure-g wrapper">
                 <label for="name">Modificar mis datos</label>
-                <button type="submit" class="pure-button pure-button-primary">Modificar</button>
-                <br>
+                <div class="wrapper_item">
+                <button onclick="location.href ='/cgi-bin/modify.cgi';" method="Post"  class="pure-button pure-button-primary">Modificar</button>
+                </div>
+
                 <label for="email">Cambiar contraseña</label>
+                <div class="wrapper_item">
                 <button onclick="location.href ='/cgi-bin/password.cgi';" method="Post" class="pure-button pure-button-primary">Cambiar contraseña</button>
-                <br>
+                </div>
+
                 <label for="email">Eliminar cuenta</label>
+                <div class="wrapper_item">
                 <button onclick="location.href ='/cgi-bin/delete.cgi';" method="Post" class="pure-button pure-button-primary1">Eliminar</button>
+                </div>
             </div>
-        </div>
     </div>
     <div class="footer l-box is-center">Copyright © 2021, The Pirate Bay<br>All rights reserved.</div>
 </body>
 
 </html>);
+}

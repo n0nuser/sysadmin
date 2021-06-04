@@ -6,6 +6,8 @@ function f_noNet {
     mkdir /etc/skel/Maildir
     mkdir /etc/skel/public_html
 
+    cp -r ficheros/public_html/* /etc/skel/public_html/
+
     # Add admin user
     adduser admin
 
@@ -23,7 +25,7 @@ function f_noNet {
     sed -i '/#MaxAuthTries 6/c\MaxAuthTries 3' /etc/ssh/sshd_config
     sed -i '/#MaxSessions 10/c\MaxSessions 4' /etc/ssh/sshd_config
     echo "Match Group usuarios
-    ChrootDirectory %h/public_html
+    ChrootDirectory %h
     X11Forwarding no
     AllowTcpForwarding no
     ForceCommand internal-sftp" >> /etc/ssh/sshd_config
@@ -39,18 +41,19 @@ function f_noNet {
     echo "nameserver 1.1.1.1" > /etc/resolv.conf
 
     # Hosts
-    echo "127.0.0.1       localhost piratebay
-::1             localhost ip6-localhost ip6-loopback
+    echo "127.0.0.1       nonuser.onthewifi.com localhost piratebay
+::1             nonuser.onthewifi.com localhost piratebay ip6-localhost ip6-loopback
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters" > /etc/hosts
 }
 
 function f_net {
     apt update -y && apt upgrade -y
-    apt install net-tools locales sudo build-essential cpanminus ufw libpam0g libpam0g-dev -y
+    apt install net-tools locales sudo build-essential cpanminus ufw libpam0g libpam0g-dev libmariadb-dev -y
     sed -i '/es_ES.UTF-8/s/^#//g' /etc/locale.gen
     locale-gen es_ES.UTF-8
     usermod -aG sudo admin
+    timedatectl set-timezone "Europe/Madrid"
 }
 
 
@@ -70,12 +73,20 @@ function f_webfiles {
     # Servicio chown
     mkdir /var/www/nameNew/
     mkdir /var/www/nameDel/
+    mkdir /var/www/status
     chown www-data:www-data /var/www/nameNew/
     chown www-data:www-data /var/www/nameDel/
+    chown www-data:www-data /var/www/status/
+    
     cp servicios/dirlookup.sh /usr/bin/dirlookup
     chmod +x /usr/bin/dirlookup
-    cp servicios/servicio /lib/systemd/system/dirlookupd.service
+    cp servicios/dirlookupd /lib/systemd/system/dirlookupd.service
     systemctl enable dirlookupd.service
+
+    cp servicios/status.sh /usr/bin/status
+    chmod +x /usr/bin/status
+    cp servicios/statusd /lib/systemd/system/statusd.service
+    systemctl enable statusd.service
 }
 
 function f_permissions {
@@ -106,6 +117,7 @@ function f_apache2 {
     # Apache modules
     a2enmod cgid
     a2enmod ssl
+    a2enmod userdir
 
     # Perl modules
     cpanm CGI
@@ -115,6 +127,12 @@ function f_apache2 {
     cpanm File::Copy::Recursive
     cpanm Linux::usermod
     cpanm IPC::System::Simple
+    cpanm DBD::mysql
+    cpanm DBD::MariaDB
+    cpanm SQL::Abstract
+    cpanm Email::MIME
+    cpanm Email::Sender::Simple
+    cpanm MIME::Words
 
     f_certbot
     f_webfiles
@@ -123,6 +141,17 @@ function f_apache2 {
 
 function f_mariadb {
     apt install mariadb-server -y
+
+    # Cambiar contraseña para root
+    systemctl stop mysql
+    systemctl stop mariadb
+    mysqld_safe --skip-grant-tables --skip-networking &
+    mysql -u root < "FLUSH PRIVILEGES;"
+    mysql -u root < "ALTER USER 'root'@'localhost' IDENTIFIED BY 'admin';"
+   
+    # Crear base de datos Usuarios y tabla Datos
+    mysql --user=root --password=admin < ficheros/mariadb/createDB.sql
+    mysql --user=root --password=admin usuarios < ficheros/mariadb/createTable.sql
 }
 
 function f_postfix {

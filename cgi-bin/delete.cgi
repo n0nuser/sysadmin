@@ -3,24 +3,59 @@
 use warnings;
 use Linux::usermod;
 use CGI;
-use CGI::Cookie;
+use CGI::Session;
 use utf8;
-use File::Copy::Recursive;
+use SQL::Abstract;
+use DBI;
+
+# Base datos
+$usuarioDB = "root";
+$claveDB = "admin";
+$DB = "usuarios";
+$tabla = "datos";
 
 $q = CGI->new;
 
-print $q->header;
+# Gestión sesión
+my $session = new CGI::Session;
+$session->load();
+my @autenticar = $session->param;
+my $username = $session->param("username");
 
-%cookies = CGI::Cookie->fetch;
-$username = $cookies{'campurriana'}->value;
+if (@autenticar eq 0) {
+    $session->delete();
+    $session->flush();
+    print $q->redirect("https://nonuser.onthewifi.com/");
+} elsif ($session->is_expired) {
+    $session->delete();
+    $session->flush();
+    print $q->redirect("https://nonuser.onthewifi.com/");
+} else {
+    print $q->header;
 
-Linux::usermod->del($username);
+    # Se borra al usuario
+    Linux::usermod->del($username);
 
-$delUser="/var/www/nameDel/$username";
-open(FH, '>', $delUser) or print "Failed to create empty: $!\n";
-close(FH);
+    # Se añade fichero para que servicio lo borre
+    $delUser="/var/www/nameDel/$username";
+    open(FH, '>', $delUser) or print "Failed to create empty: $!\n";
+    close(FH);
 
-print qq(<!doctype html><html lang="en">
+    # Gestión Base Datos
+    my $sql = SQL::Abstract->new;
+    $dbh = DBI->connect("DBI:MariaDB:$DB:localhost", $usuarioDB, $claveDB) or die "\nError al abrir la base de datos.\n";
+    my %where = (
+        usuario => $username
+    );
+    my($stmt, @bind) = $sql->delete($tabla, \%where);
+    my $sth = $dbh->prepare($stmt);
+    $sth->execute(@bind);
+    $dbh->disconnect or warn "\nFallo al desconectar.\n";
+
+    # Se borra la sesión
+    $session->delete();
+    $session->flush();
+    print qq(<!doctype html><html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -69,8 +104,8 @@ print qq(<!doctype html><html lang="en">
 
             <ul class="pure-menu-list">
                 <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
-                <li class="pure-menu-item"><a href="#" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/login.html" class="pure-menu-link">Iniciar sesión</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/cgi-bin/login.cgi" class="pure-menu-link">Iniciar sesión</a></li>
             </ul>
         </div>
     </div>
@@ -88,3 +123,4 @@ print qq(<!doctype html><html lang="en">
 </body>
 
 </html>);
+}

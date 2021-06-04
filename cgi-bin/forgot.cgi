@@ -57,34 +57,14 @@ print qq(<!DOCTYPE html
         </div>
     </div>
     <div class="center-screen">
-        <form class="pure-form" action="/cgi-bin/registered.cgi" method="Post">
+        <form class="pure-form" action="/cgi-bin/forgotten.cgi" method="Post">
             <fieldset style="background: white; padding: 2em; border: 20px; border-radius: 15px; border-color: black; text-align: left;">
                 <div class="pure-control-group">
-                    <label for="aligned-name">Nombre de usuario</label>
-                    <input name="username" required="required" type="text" id="aligned-name" onkeyup="return forceLower(this);" placeholder="Introduzca su nombre de usuario" />
-                </div>
-                <div class="pure-control-group">
-                    <label for="aligned-password">Contraseña</label>
-                    <input name="password1" required="required" type="password" id="aligned-password" placeholder="Introduzca una contraseña" />
-                </div>
-                <div class="pure-control-group">
-                    <label for="aligned-password">Confirmación de constraseña</label>
-                    <input name="password2" type="password" id="aligned-password" placeholder="Confirmación de contraseña" />
-                </div>
-                <div class="pure-control-group">
                     <label for="aligned-email">Dirección de correo</label>
-                    <input name="email" required="required" type="email" id="aligned-email" placeholder="Introduzca su dirección de correo" />
-                </div>
-                <div class="pure-control-group">
-                    <label for="aligned-foo">Nombre</label>
-                    <input name="name" required="required" type="text" id="aligned-foo" placeholder="Introduzca su nombre aquí" />
-                </div>
-                <div class="pure-control-group">
-                    <label for="aligned-foo">Apellidos</label>
-                    <input name="surname" required="required" type="text" id="aligned-foo" placeholder="Introduzca sus apellidos aquí" />
-                </div>
-                <br />
-                <button type="submit" class="pure-button pure-button-primary">Registrarse</button>
+                    <input name="email" type="email" id="aligned-email" placeholder="Introduzca su dirección de correo" />
+                </div>                
+                <br/>
+                <button type="submit" class="pure-button pure-button-primary">Enviar</button>
             </fieldset>
         </form>
     </div>

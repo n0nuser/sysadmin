@@ -1,21 +1,30 @@
 #!/usr/bin/perl -w
 
 use warnings;
-use Linux::usermod;
 use CGI;
-use CGI::Cookie;
+use CGI::Session;
 use utf8;
-use File::Copy::Recursive;
 
 $q = CGI->new;
 
-print $q->header;
+# Gestión sesión
+my $session = new CGI::Session;
+$session->load();
+my @autenticar = $session->param;
 
-%cookies = CGI::Cookie->fetch;
-$username = $cookies{'campurriana'}->value;
-
-print qq(<!doctype html><html lang="en">
-
+if (@autenticar eq 0) {
+    $session->delete();
+    $session->flush();
+    print $q->redirect("https://nonuser.onthewifi.com/");
+} elsif ($session->is_expired) {
+    $session->delete();
+    $session->flush();
+    print $q->redirect("https://nonuser.onthewifi.com/");
+} else {
+    print $q->header;
+    my $username = $session->param("username");
+    print qq(<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%><!doctype html><html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,52 +63,62 @@ print qq(<!doctype html><html lang="en">
             color: #fff;
         }
     </style>
-    <script>  
-        function checkPassword(form) {
-            password1 = form.password1.value;
-            password2 = form.password2.value;
-
-            if (password1 == '')
-                alert ("Introduzca la contraseña");
-                    
-            else if (password2 == '')
-                alert ("Introduzca la confirmación de contraseña");
-                    
-            else if (password1 != password2) {
-                alert ("\nLas contraseñas no coinciden: Inténtelo de nuevo...")
-                return false;
+     <script type="text/JavaScript">
+          
+            // Function to check Whether both passwords
+            // is same or not.
+            function checkPassword(form) {
+                password1 = form.password1.value;
+                password2 = form.password2.value;
+  
+                // If password not entered
+                if (password1 == '')
+                    alert ("Please enter Password");
+                      
+                // If confirm password not entered
+                else if (password2 == '')
+                    alert ("Please enter confirm password");
+                      
+                // If Not same return False.    
+                else if (password1 != password2) {
+                    alert ("\nPassword did not match: Please try again...")
+                    return false;
+                }
+  
+                // If same return True.
+                else{
+                    alert("Password Match: Welcome to GeeksforGeeks!")
+                    return true;
+                }
             }
-
-            else{
-                alert ("\nContraseña modificada correctamente.")
-                return true;
-            }
-        }
-    </script>
-</head>
+        </script>
+   </head>
 
 <body>
+ 
     <div class="header">
         <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
             <a class="pure-menu-heading" href="https://nonuser.onthewifi.com/">The Pirate Bay</a>
 
             <ul class="pure-menu-list">
-                <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
-                <li class="pure-menu-item"><a href="#" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/login.html" class="pure-menu-link">Iniciar sesión</a></li>
+                <li class="pure-menu-item"><a href="dashboard.cgi" class="pure-menu-link">Dashboard</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
+                <li class="pure-menu-item"><a href="delSession.cgi" class="pure-menu-link">Cerrar Sesión</a></li>
             </ul>
         </div>
     </div>
+    
     <div class="content center-screen">
-        <form class="pure-form" onSubmit="return checkPassword(this)" action="/cgi-bin/passwd.cgi" method="Post">
+        <form class="pure-form" onSubmit="return checkPassword()" >
             <fieldset style="background: white; padding: 2em; border: 20px; border-radius: 15px; border-color: black;">
-                <input name="password1" type="password" placeholder="Contraseña nueva" /><br>
-                <input name="password2" type="password" placeholder="Confirmar contraseña" /><br>
+                <input  name="password1" type="password" placeholder="Contraseña nueva" /><br>
+                <input  name="password2" type="password" placeholder="Confirmar contraseña" /><br>
                 <button type="submit" class="pure-button pure-button-primary">Modificar contraseña</button>
             </fieldset>
         </form>
     </div>
     <div class="footer l-box is-center">Copyright © 2021, The Pirate Bay<br>All rights reserved.</div>
+    
 </body>
-
 </html>);
+}
