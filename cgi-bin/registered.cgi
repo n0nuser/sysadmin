@@ -4,7 +4,6 @@ use warnings;
 use utf8;
 
 use CGI;
-use CGI::Cookie;
 use CGI::Session;
 
 use Linux::usermod;
@@ -35,7 +34,7 @@ $tabla = 'datos';
 # Usuario Sistema
 $directory = "/home/$username";
 $group = "1001";
-$shell = "/bin/bash";
+$shell = "/usr/sbin/nologin";
 
 # Creamos el objeto para SQL Abstract
 my $sql = SQL::Abstract->new;
@@ -81,6 +80,7 @@ if ($query eq "" ){
 
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <!--[if !mso]><!-->
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
@@ -435,9 +435,10 @@ else {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="A layout example that shows off a responsive product landing page.">
         <title>Hi! | The Pirate Bay &#127988;&#8205;&#9760;&#65039;</title>
-        <link rel="stylesheet" href="../css/pure-min.css">
+        <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
+    <link rel="stylesheet" href="../css/pure-min.css">
         <link rel="stylesheet" href="../css/grids-responsive-min.css">
-        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
         <link rel="stylesheet" href="../css/styles.css">
         <style>
             .center-screen {
@@ -478,7 +479,7 @@ else {
                 <ul class="pure-menu-list">
                     <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
                     <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
-                    <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/cgi-bin/login.cgi" class="pure-menu-link">Iniciar sesión</a></li>
+                    <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/cgi-bin/login.cgi" class="pure-menu-link">Mi cuenta</a></li>
                 </ul>
             </div>
         </div>

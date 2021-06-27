@@ -13,6 +13,7 @@ print qq(<!DOCTYPE html
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
     <link rel="stylesheet" href="../css/pure-min.css" />
     <link rel="stylesheet" href="../css/styles.css" />
     <link rel="stylesheet" href="../css/grids-responsive-min.css">
@@ -52,7 +53,7 @@ print qq(<!DOCTYPE html
                     <a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a>
                 </li>
                 <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="login.cgi" class="pure-menu-link">Iniciar sesión</a></li>
+                <li class="pure-menu-item"><a href="login.cgi" class="pure-menu-link">Mi cuenta</a></li>
             </ul>
         </div>
     </div>

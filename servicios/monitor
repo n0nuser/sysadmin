@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+
+use CGI;
+use warnings;
+use strict;
+use Filesys::DiskUsage qw/du/;
+use Proc::ProcessTable;
+
+use SQL::Abstract;
+use DBI;
+
+use Email::MIME;
+use Email::Sender::Simple qw(sendmail);
+use MIME::Words qw(:all);
+
+# Base datos
+my $usuarioDB = "root";
+my $claveDB = "admin";
+my $DB = "usuarios";
+my $tabla = 'datos';
+
+# Gestión base datos
+my $sql = SQL::Abstract->new;
+my $dbh = DBI->connect("DBI:MariaDB:$DB:localhost", $usuarioDB, $claveDB) or print "\nError al abrir la base de datos.\n";
+
+my($stmt, @bind) = $sql->select($tabla,'usuario');
+my $sth = $dbh->prepare($stmt);
+$sth->execute(@bind);
+
+# Creamos el fichero
+my $file = "/tmp/informe.txt";
+open(my $fp, '>', $file) or die "Error al abrir el archivo $file";
+
+# Información sobre el uso del disco
+print $fp "\n#################\n# Uso del disco #\n#################\n\n";
+my @usuarios;
+while (@usuarios = $sth->fetchrow_array){
+    my $usuario = $usuarios[0];
+    print $fp "Nombre del usuario: ";
+    printf $fp "$usuario\n";
+    my $dir = "/home/" . $usuario . "/";
+    my $tam = du ( { 'human-readable' => 1 } , $dir );
+    printf $fp '%-20s %-20s' . "\n","Espacio usado","Directorio";
+    printf $fp '%-20s %-20s' . "\n","$tam","$dir";
+}
+
+# Desconexión de la base de datos
+$dbh->disconnect or warn "\nFallo al desconectar.\n";
+
+# Información sobre los procesos
+print $fp "\n############\n# Procesos #\n############\n\n";
+my $t = new Proc::ProcessTable;
+my $p;
+my $linea;
+printf $fp '%-6s %-10s %-10s %-10s %-50s' . "\n","PID","STAT","%MEM","CPU","COMMAND";  
+foreach $p ( @{$t->table} ){
+    printf $fp '%-6d %-10s %-10f %-10f %-50s' . "\n",$p->pid,$p->state,$p->pctmem,$p->pctcpu,$p->cmndline;
+}
+
+# Información de memoria
+print $fp "\n##########################\n# Informacion de memoria #\n##########################\n\n";
+    
+    my $datosmeminfo = "";
+    open(my $fh, '<', "/proc/meminfo");
+    {
+        local $/;
+        $datosmeminfo = <$fh>;
+    }    
+    close($fh);
+    print $fp $datosmeminfo;
+close($fp);
+
+my $body;
+my $filename = "/tmp/informe.txt";
+open($fh, '<', $filename) or die "cannot open file $filename";
+{
+    local $/;
+    $body = <$fh>;
+}
+close($fh);
+
+# Enviar correo al administrador
+    my $message = Email::MIME->create(
+    header_str => [
+        From    => '"The Pirate Bay" <admin@nonuser.onthewifi.com>',
+        To      => 'admin@nonuser.onthewifi.com',
+        Subject => "Informe de monitorizacion",
+    ],
+    attributes => {
+        content_type => 'text/plain',
+        encoding => 'base64',
+        charset  => 'UTF-8',
+    },
+    body_str => $body,
+);
+sendmail($message);

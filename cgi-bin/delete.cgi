@@ -62,9 +62,10 @@ if (@autenticar eq 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A layout example that shows off a responsive product landing page.">
     <title>Hi! | The Pirate Bay &#127988;&#8205;&#9760;&#65039;</title>
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
     <link rel="stylesheet" href="../css/pure-min.css">
     <link rel="stylesheet" href="../css/grids-responsive-min.css">
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         .center-screen {
@@ -105,7 +106,7 @@ if (@autenticar eq 0) {
             <ul class="pure-menu-list">
                 <li class="pure-menu-item pure-menu-selected"><a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a></li>
                 <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/cgi-bin/login.cgi" class="pure-menu-link">Iniciar sesión</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/cgi-bin/login.cgi" class="pure-menu-link">Mi cuenta</a></li>
             </ul>
         </div>
     </div>

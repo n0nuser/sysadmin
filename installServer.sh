@@ -24,11 +24,6 @@ function f_noNet {
     sed -i '/#LoginGraceTime 2m/c\LoginGraceTime 1m' /etc/ssh/sshd_config
     sed -i '/#MaxAuthTries 6/c\MaxAuthTries 3' /etc/ssh/sshd_config
     sed -i '/#MaxSessions 10/c\MaxSessions 4' /etc/ssh/sshd_config
-    echo "Match Group usuarios
-    ChrootDirectory %h
-    X11Forwarding no
-    AllowTcpForwarding no
-    ForceCommand internal-sftp" >> /etc/ssh/sshd_config
 
     # Configure Static IP
     echo "auto eth0
@@ -49,13 +44,17 @@ ff02::2         ip6-allrouters" > /etc/hosts
 
 function f_net {
     apt update -y && apt upgrade -y
-    apt install net-tools locales sudo build-essential cpanminus ufw libpam0g libpam0g-dev libmariadb-dev -y
+    apt install net-tools locales jq sudo build-essential pkg-config libgd-dev git cmake cpanminus ufw libpam0g libpam0g-dev libmariadb-dev -y
     sed -i '/es_ES.UTF-8/s/^#//g' /etc/locale.gen
     locale-gen es_ES.UTF-8
     usermod -aG sudo admin
     timedatectl set-timezone "Europe/Madrid"
 }
 
+
+function f_ssh {
+    cp ficheros/ssh/sshd_config /etc/ssh/sshd_config
+}
 
 function f_certbot {
     # Instalación SSL
@@ -69,24 +68,6 @@ function f_webfiles {
     
     # CGIs
     cp -r cgi-bin/* /lib/cgi-bin/
-        
-    # Servicio chown
-    mkdir /var/www/nameNew/
-    mkdir /var/www/nameDel/
-    mkdir /var/www/status
-    chown www-data:www-data /var/www/nameNew/
-    chown www-data:www-data /var/www/nameDel/
-    chown www-data:www-data /var/www/status/
-    
-    cp servicios/dirlookup.sh /usr/bin/dirlookup
-    chmod +x /usr/bin/dirlookup
-    cp servicios/dirlookupd /lib/systemd/system/dirlookupd.service
-    systemctl enable dirlookupd.service
-
-    cp servicios/status.sh /usr/bin/status
-    chmod +x /usr/bin/status
-    cp servicios/statusd /lib/systemd/system/statusd.service
-    systemctl enable statusd.service
 }
 
 function f_permissions {
@@ -108,11 +89,35 @@ function f_permissions {
     # User directories
     chgrp www-data /home
     chmod 775 /home
+
+    # Servicio chown
+    mkdir /var/www/nameNew/
+    mkdir /var/www/nameDel/
+    mkdir /var/www/status
+    chown www-data:www-data /var/www/nameNew/
+    chown www-data:www-data /var/www/nameDel/
+    chown www-data:www-data /var/www/status/
+    
+    cp servicios/dirlookup /usr/bin/dirlookup
+    chmod +x /usr/bin/dirlookup
+    cp servicios/dirlookupd.service /lib/systemd/system/dirlookupd.service
+    systemctl enable dirlookupd.service
+
+    cp servicios/status /usr/bin/status
+    chmod +x /usr/bin/status
+    (crontab -l 2>/dev/null; echo "*/15 * * * * /usr/bin/status") | crontab -
+    systemctl enable statusd.service
+
+    # Pagina Admin
+    cpanm ExtUtils::PkgConfig
+    cpanm GD::Graph
 }
 
 function f_apache2 {
     apt install apache2 -y
     groupadd usuarios
+
+    cp ficheros/apache/apache2.conf /etc/apache2/apache2.conf
 
     # Apache modules
     a2enmod cgid
@@ -121,6 +126,10 @@ function f_apache2 {
 
     # Perl modules
     cpanm CGI
+    cpanm CGI::Session
+    cpanm Filesys::DiskUsage
+    cpanm Proc::ProcessTable
+    cpanm Crypt::RandPasswd
     cpanm Authen::PAM
     cpanm Sys::Load
     cpanm utf8
@@ -130,6 +139,8 @@ function f_apache2 {
     cpanm DBD::mysql
     cpanm DBD::MariaDB
     cpanm SQL::Abstract
+    cpanm File::Slurp
+    cpanm Data::Dumper::Simple
     cpanm Email::MIME
     cpanm Email::Sender::Simple
     cpanm MIME::Words
@@ -146,8 +157,7 @@ function f_mariadb {
     systemctl stop mysql
     systemctl stop mariadb
     mysqld_safe --skip-grant-tables --skip-networking &
-    mysql -u root < "FLUSH PRIVILEGES;"
-    mysql -u root < "ALTER USER 'root'@'localhost' IDENTIFIED BY 'admin';"
+    mysql -u root < ficheros/mariadb/createDB.sql
    
     # Crear base de datos Usuarios y tabla Datos
     mysql --user=root --password=admin < ficheros/mariadb/createDB.sql
@@ -200,55 +210,12 @@ function f_fail2ban {
     cp ficheros/fail2ban/jail.local /etc/fail2ban/jail.local
 
     # Enable jails in Debian
-    echo "[sshd]
-enabled = true
-
-[apache-auth]
-enabled = true
-
-[apache-badbots]
-enabled = true
-
-[apache-noscript]
-enabled = true
-
-[apache-overflows]
-enabled = true
-
-[apache-nohome]
-enabled = true
-
-[apache-botsearch]
-enabled = true
-
-[apache-fakegooglebot]
-enabled = true
-
-[apache-modsecurity]
-enabled = true
-
-[apache-shellshock]
-enabled = true
-
-[dovecot]
-enabled = true
-
-[postfix]
-enabled = true
-
-[postfix-rbl]
-enabled = true
-
-[postfix-sasl]
-enabled = true
-
-[roundcube-auth]
-enabled = true" > /etc/fail2ban/jail.d/defaults-debian.conf
+    cp ficheros/fail2ban/defaults-debian.conf > /etc/fail2ban/jail.d/defaults-debian.conf
 
     systemctl restart fail2ban
 }
 
-function quota {
+function f_quota {
     apt install quota -y
     # Edit /etc/fstab
     mount -o remount /
@@ -272,18 +239,72 @@ local6.error        /home/admin/access.log' > /etc/rsyslog.d/02-apache.conf
     systemctl restart rsyslog
 }
 
+
+function f_wordpress {
+    wget https://wordpress.org/latest.tar.gz
+    tar -xzvf latest.tar .gz
+    mv wordpress/ /var/www/html
+    chown www-data:www-data /var/www/html/wordpress/*
+
+    cp ficheros/apache/.htaccessWordpress > /var/www/html/wordpress/.htaccess
+}
+
+function f_tripwire {
+    apt install tripwire -y
+    tripwire --init
+}
+
+function f_monitorizacion {
+    cp servicios/monitor.pl /usr/bin/monitor
+    chmod +x /usr/bin/monitor
+    (crontab -l 2>/dev/null; echo "0 8 * * * /usr/bin/monitor") | crontab -
+}
+
+function f_backup {
+    mkdir /backups
+    cp servicios/backup /usr/bin/backup
+    (crontab -l 2>/dev/null; echo "0 4 * * * /usr/bin/backup") | crontab -
+}
+
+function f_mumble {
+    # Install Docker
+    curl -sSL https://get.docker.com/ | sh
+	apt-get install docker-ce docker-ce-cli containerd.io -y
+
+    # Install Mumble (ISO)
+	docker run -d --name mumble -p 64738:64738  -p 64738:64738/udp ugeek/mumble:arm
+
+    #Install NANO
+    docker exec -i -t --user root mumble sh
+    apk add nano
+
+	# Manage Mumble with console
+    #docker exec -i -t --user root mumble sh
+    # Copy config file to Mumble
+    docker cp ficheros/mumble/mumble-server.ini mumble:/config/mumble-server.ini
+
+    # Servicio para Mumble
+    cp servicios/mumble.service /lib/systemd/system/mumble.service
+}
+
 function main {
     read -p "Do you have internet? (Y/N): " yesNo
     if [ $yesNo = "Y" ] || [ $yesNo = "y" ]; then
         f_net
-        f_mariadb
+        f_ssh
         f_apache2
+        f_mariadb
         f_postfix
         f_dovecot
         f_roundcube
         f_fail2ban
         f_quota
         f_rsyslog
+        f_wordpress
+        f_tripwire
+        f_monitorizacion
+        f_backup
+        f_mumble
     else
         f_noNet
     fi

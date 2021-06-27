@@ -7,14 +7,16 @@ use utf8;
 $q = CGI->new;
 print $q->header;
 
-print qq(<!DOCTYPE html
-          PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+print qq(<!DOCTYPE html>
+<html lang="es">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
     <link rel="stylesheet" href="../css/pure-min.css" />
     <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="../css/grids-responsive-min.css">
     <title>Login | The Pirate Bay &#127988;&#8205;&#9760;&#65039;</title>
     <style>
@@ -48,11 +50,8 @@ print qq(<!DOCTYPE html
         <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
             <a class="pure-menu-heading" href="https://nonuser.onthewifi.com/">The Pirate Bay</a>
             <ul class="pure-menu-list">
-                <li class="pure-menu-item pure-menu-selected">
-                    <a href="https://nonuser.onthewifi.com/" class="pure-menu-link">Inicio</a>
-                </li>
                 <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="login.cgi" class="pure-menu-link">Iniciar sesión</a></li>
+                <li class="pure-menu-item"><a href="login.cgi" class="pure-menu-link">Mi Cuenta</a></li>
             </ul>
         </div>
     </div>

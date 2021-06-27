@@ -4,6 +4,7 @@ use CGI;
 use File::Slurp;
 use Data::Dumper::Simple;
 use strict;
+use utf8;
 
 my $q = CGI->new;
 
@@ -12,10 +13,11 @@ my $sshd = read_file('/var/www/status/sshd');
 my $postfix = read_file('/var/www/status/postfix');
 my $dovecot = read_file('/var/www/status/dovecot');
 my $mariadb = read_file('/var/www/status/mariadb');
+my $mumble = read_file('/var/www/status/mumble');
 
-my @services = ($apache, $sshd, $postfix, $dovecot, $mariadb);
-my @servicios = ("apache2", "sshd", "postfix", "dovecot", "mariadb");
-my $i = 5;
+my @services = ($apache, $sshd, $sshd, $postfix, $dovecot, $mariadb, , $mumble);
+my @servicios = ("Web", "SSH", "SFTP", "SMTP", "IMAP", "Database", "VOIP");
+my $i = 7;
 
 print $q->header;
 
@@ -27,9 +29,10 @@ print qq(<!doctype html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A layout example that shows off a responsive product landing page.">
     <title>Hi! | The Pirate Bay &#127988;&#8205;&#9760;&#65039;</title>
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
     <link rel="stylesheet" href="../css/pure-min.css">
     <link rel="stylesheet" href="../css/grids-responsive-min.css">
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         .center-screen {
@@ -39,25 +42,6 @@ print qq(<!doctype html>
             align-items: center;
             text-align: center;
             min-height: 100vh;
-        }
-
-        .pure-button {
-            font-family: inherit;
-            font-size: 100%;
-            padding: 0.5em 1em;
-            color: white !important;
-            border: none transparent;
-            background-color: white;
-            text-decoration: none;
-            border-radius: 2px;
-        }
-
-        .pure-button-primary,
-        .pure-button-selected,
-        a.pure-button-primary,
-        a.pure-button-selected {
-            background-color: #1f8dd6;
-            color: #fff;
         }
     </style>
 </head>
@@ -69,8 +53,7 @@ print qq(<!doctype html>
 
             <ul class="pure-menu-list">
                 <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
-                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/cgi-bin/login.cgi"
-                        class="pure-menu-link">Iniciar sesión</a></li>
+                <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/cgi-bin/login.cgi" class="pure-menu-link">Mi cuenta</a></li>
             </ul>
         </div>
     </div>
@@ -93,6 +76,7 @@ print qq(<!doctype html>
           <h1>Status Page</h1>
         </div>
       </div>
+      <p>La información se actualiza cada 15 minutos.</p>
       <div class="row clearfix">
           <div class="col-md-12 column">
               <div class="row clearfix">

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+rsync -ravzh /home/ /backups/
+rsync -ravzh /root/ /backups/
+
+rsync -ravzh /etc/ /backups/
+
+rsync -ravzh /var/www/ /backups/
+rsync -ravzh /lib/cgi-bin /backups/
+
+rsync -ravzh /lib/systemd/system/ /backups/
+rsync -avzh /usr/bin/status /backups/
+rsync -avzh /usr/bin/dirlookup /backups/
+rsync -avzh /usr/bin/monitor /backups/

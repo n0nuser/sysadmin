@@ -2,7 +2,6 @@
 
 use warnings;
 use CGI;
-use CGI::Cookie;
 use CGI::Session;
 use utf8;
 
@@ -27,6 +26,7 @@ if (@autenticar eq 0 || $session->is_expired) {
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
   <link rel="stylesheet" href="../css/pure-min.css">
   <link rel="stylesheet" href="../css/grids-responsive-min.css">
   <link rel="stylesheet" href="../css/styles.css">
@@ -57,7 +57,7 @@ if (@autenticar eq 0 || $session->is_expired) {
       <a class="pure-menu-heading" href="https://nonuser.onthewifi.com/">The Pirate Bay</a>
 
       <ul class="pure-menu-list">
-        <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/var/www/html/ayuda.html" class="pure-menu-link">Ayuda</a></li>
+        <li class="pure-menu-item"><a href="https://nonuser.onthewifi.com/ayuda.html" class="pure-menu-link">Ayuda</a></li>
         <li class="pure-menu-item"><a href="#" class="pure-menu-link">Mi cuenta</a></li>
       </ul>
     </div>
@@ -65,8 +65,8 @@ if (@autenticar eq 0 || $session->is_expired) {
   <div class="center-screen">
     <form class="pure-form" action="/cgi-bin/logged.cgi" method="Post">
       <fieldset style="background: white; padding: 2em; border: 20px; border-radius: 15px; border-color: black;">
-        <input name="email" type="text" placeholder="Email" /><br>
-        <input name="password" type="password" placeholder="Password" /><br>
+        <input name="email" type="text" placeholder="Usuario" /><br>
+        <input name="password" type="password" placeholder="Contraseña" /><br>
         <button type="submit" class="pure-button pure-button-primary">Iniciar Sesión</button>
         <p>¿No tienes cuenta? <a href="register.cgi">Regístrate</a></p>
         <p>¿Has olvidado tu contraseña? <a href="forgot.cgi">Contraseña olvidada</a></p>
@@ -77,5 +77,13 @@ if (@autenticar eq 0 || $session->is_expired) {
 
 </html>);
 } else {
-  print $q->redirect("https://nonuser.onthewifi.com/cgi-bin/dashboard.cgi");
+  my $username = $session->param("username");
+  if($username eq "admin")
+  {
+    print $q->redirect("https://nonuser.onthewifi.com/cgi-bin/admin.cgi");
+  }
+  else
+  {
+    print $q->redirect("https://nonuser.onthewifi.com/cgi-bin/dashboard.cgi");
+  }
 }

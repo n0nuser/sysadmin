@@ -7,7 +7,6 @@
 #     access username/password file.
 
 use CGI;
-use CGI::Cookie;
 use CGI::Session;
 use Authen::PAM;
 use POSIX;
@@ -47,14 +46,13 @@ my $res = $pamh->pam_authenticate;
 
 # Return success or failure
 if ($res == PAM_SUCCESS()) {
-    #$session = new CGI::Session("driver:File", undef, {Directory=>"/tmp"});
-    #$session->param("name", $username);
-    #$session->expire('+1h'); # expire after 1 hour
-    #my $cookie = $cgi->cookie(CGISESSID => $session->id);
-    
     if ($username eq "admin")
     {
-        print $cgi->redirect ( -url => "https://nonuser.onthewifi.com/cgi-bin/admin.cgi", -cookie => $cookie );
+        my $session = new CGI::Session;
+        $session->save_param($cgi);
+        $session->expires("+1h");
+        $session->flush();
+        print $session->header(-location => "admin.cgi");
     }
     else{
         # https://www.youtube.com/watch?v=qtRRXy2oNUQ

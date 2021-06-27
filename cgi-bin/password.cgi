@@ -30,9 +30,10 @@ if (@autenticar eq 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A layout example that shows off a responsive product landing page.">
     <title>Hi! | The Pirate Bay &#127988;&#8205;&#9760;&#65039;</title>
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" sizes="128x128">
     <link rel="stylesheet" href="../css/pure-min.css">
     <link rel="stylesheet" href="../css/grids-responsive-min.css">
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         .center-screen {
@@ -109,7 +110,7 @@ if (@autenticar eq 0) {
     </div>
     
     <div class="content center-screen">
-        <form class="pure-form" onSubmit="return checkPassword()" >
+        <form class="pure-form" action="passwd.cgi" method="Post" >
             <fieldset style="background: white; padding: 2em; border: 20px; border-radius: 15px; border-color: black;">
                 <input  name="password1" type="password" placeholder="Contraseña nueva" /><br>
                 <input  name="password2" type="password" placeholder="Confirmar contraseña" /><br>
